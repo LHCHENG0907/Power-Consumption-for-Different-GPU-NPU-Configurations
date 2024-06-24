@@ -1,0 +1,80 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# GPU and NPU power consumption values
+power_rtx_3060 = 170
+power_rtx_4090 = 450
+power_kl720 = 0.75
+
+# Configurations
+configurations = ['3x RTX 3060', '3x RTX 4090', '1x RTX 3060 + 2x RTX 4090', '3x KL720']
+power_values = [
+    [power_rtx_3060, power_rtx_3060, power_rtx_3060],  # 3x RTX 3060
+    [power_rtx_4090, power_rtx_4090, power_rtx_4090],  # 3x RTX 4090
+    [power_rtx_3060, power_rtx_4090, power_rtx_4090],  # 1x RTX 3060 + 2x RTX 4090
+    [power_kl720, power_kl720, power_kl720]            # 3x KL720
+]
+
+# Plotting the stacked bar chart
+fig, ax = plt.subplots()
+bar_width = 0.35
+index = np.arange(len(configurations))
+
+# Colors for the GPUs and NPU
+colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+
+# Stacking the bars
+bottom = np.zeros(len(configurations))
+total_power = np.zeros(len(configurations))
+for i in range(3):
+    # For first configuration (3x RTX 3060)
+    if i == 0:
+        ax.bar(index[0], power_values[0][i], bar_width, bottom=bottom[0], label='RTX 3060', color=colors[0])
+        bottom[0] += power_values[0][i]
+    else:
+        ax.bar(index[0], power_values[0][i], bar_width, bottom=bottom[0], color=colors[0])
+        bottom[0] += power_values[0][i]
+    total_power[0] += power_values[0][i]
+        
+    # For second configuration (3x RTX 4090)
+    if i == 0:
+        ax.bar(index[1], power_values[1][i], bar_width, bottom=bottom[1], label='RTX 4090', color=colors[1])
+        bottom[1] += power_values[1][i]
+    else:
+        ax.bar(index[1], power_values[1][i], bar_width, bottom=bottom[1], color=colors[1])
+        bottom[1] += power_values[1][i]
+    total_power[1] += power_values[1][i]
+    
+    # For third configuration (1x RTX 3060 + 2x RTX 4090)
+    if i == 0:
+        ax.bar(index[2], power_values[2][i], bar_width, bottom=bottom[2], color=colors[0])
+        bottom[2] += power_values[2][i]
+    else:
+        ax.bar(index[2], power_values[2][i], bar_width, bottom=bottom[2], color=colors[1])
+        bottom[2] += power_values[2][i]
+    total_power[2] += power_values[2][i]
+        
+    # For fourth configuration (3x KL720)
+    kl720_bar = ax.bar(index[3], power_values[3][i] + 5, bar_width, bottom=bottom[3], label='KL720' if i == 0 else "", color=colors[2])
+    bottom[3] += power_values[3][i] + 5  # Adding a small value to make it visible
+    total_power[3] += power_values[3][i] + 5
+
+# Annotate each bar with its total power consumption
+for idx, (x, total) in enumerate(zip(index, total_power)):
+    ax.annotate(f'{int(total)} W',
+                xy=(x, total),
+                xytext=(0, 3),  # 3 points vertical offset
+                textcoords="offset points",
+                ha='center', va='bottom')
+
+# Labels and title
+ax.set_xlabel('Configurations')
+ax.set_ylabel('Power Consumption (W)')
+ax.set_title('Power Consumption for Different GPU/NPU Configurations')
+ax.set_xticks(index)
+ax.set_xticklabels(configurations)
+ax.legend()
+
+# Display the plot
+plt.tight_layout()
+plt.show()
